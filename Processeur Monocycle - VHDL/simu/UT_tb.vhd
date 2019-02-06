@@ -3,7 +3,6 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 Entity UT_tb is Port(
-  OK : out boolean);
 end entity;
 
 Architecture TB of UT_tb is
