@@ -14,15 +14,16 @@ end entity;
 Architecture RTL of assemblage_UT is 
   signal busA, busB, busW : std_logic_vector(31 downto 0);
   signal imm_extended : std_logic_vector(31 downto 0);
-  signal ALUout, DataIn, DataOut : std_logic_vector(31 downto 0);
+  signal ALUout, DataOut : std_logic_vector(31 downto 0);
   signal muxToAlu : std_logic_vector(31 downto 0);
+  
   Begin
     
     C0 : entity work.register_bank(RTL) port map(clk => clk, rst => rst, W => busW, RA => RA, RB => RB, RW => RW, WE => RegWr, A => busA, B => busB);
     C1 : entity work.MUX21(behav) generic map(N => 32) port map(A => busB, B => imm_extended, COM => SEL1, S => muxToAlu);
     C2 : entity work.imm_extender(RTL) generic map(N => 8) port map(E => Imm, S => imm_extended);
     C3 : entity work.ALU(RTL) port map(OP => OP, A => busA, B => muxToAlu, S => ALUout, N => flag);
-    C4 : entity work.data_memory(RTL) port map(CLK => CLK, RST => RST, Addr => ALUout(5 downto 0), WrEn => WrEn, DataIn => DataIn, DataOut => DataOut);
+    C4 : entity work.data_memory(RTL) port map(CLK => CLK, RST => RST, Addr => ALUout(5 downto 0), WrEn => WrEn, DataIn => busB, DataOut => DataOut);
     C5 : entity work.MUX21(behav) generic map(N => 32) port map(A => ALUout, B => DataOut, COM => SEL2, S => busW);
     
 end RTL;

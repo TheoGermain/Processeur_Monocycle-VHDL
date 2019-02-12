@@ -31,7 +31,7 @@ Architecture TB of UT_tb is
     
        wait for 5 ns;
      
-       clk <= '1';
+       clk <= '1';    --Verification visuelle dans les registres
     
        wait for 5 ns;
        
@@ -54,10 +54,6 @@ Architecture TB of UT_tb is
        clk <= '1';
        wait for 5 ns;
        clk <= '0';
-       
-       
-       
-       
     
     wait;
   end process;
