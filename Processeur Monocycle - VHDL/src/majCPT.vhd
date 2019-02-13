@@ -4,24 +4,24 @@ use ieee.numeric_std.all;
 
 Entity majCPT is Port(
   nPCsel   : in std_logic;
-  PCin, SignExt : in std_logic_vector(31 downto 0);
-  PCout         : out std_logic_vector(31 downto 0));
+  majPCin, SignExt : in std_logic_vector(31 downto 0);
+  majPCout         : out std_logic_vector(31 downto 0));
 end entity;
 
 
 Architecture RTL of majCPT is
   begin
     
-    process(nPCsel, PCin)
+    process(nPCsel, majPCin, SignExt)
       begin
         
           
           if nPCsel = '1' then
             
-            PCout <= std_logic_vector(unsigned(PCin) + 1 + unsigned(SignExt));
+            majPCout <= std_logic_vector(to_unsigned(to_integer(unsigned(majPCin)) + 1 + to_integer(signed(SignExt)), 32));
             
           else
-            PCout <= std_logic_vector(unsigned(PCin) + 1) ;
+            majPCout <= std_logic_vector(unsigned(majPCin) + 1) ;
             
           end if;
           

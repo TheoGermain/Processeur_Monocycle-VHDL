@@ -8,7 +8,10 @@ Entity PC is Port(
 end entity;
 
 Architecture RTL of PC is
+  signal data : std_logic_vector(31 downto 0);
   Begin
+    
+    Sortie <= data;
     
     process(clk, rst)
       
@@ -16,13 +19,12 @@ Architecture RTL of PC is
         
         if rst = '1' then
           
-          Sortie <= (others => '0');
+          data <= (others => '0');
           
-          elsif rising_edge(clk) then
+        elsif rising_edge(clk) then
             
-          Sortie <= Entree;
-          
-          end if;
+          data <= (others => '0');
+          data(0) <= Entree;
           
         end if;
         
