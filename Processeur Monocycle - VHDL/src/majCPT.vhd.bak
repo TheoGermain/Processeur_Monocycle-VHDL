@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 Entity majCPT is Port(
-  nPCsel   : in std_logic;
+  CLK, nPCsel   : in std_logic;
   PCin, SignExt : in std_logic_vector(31 downto 0);
   PCout         : out std_logic_vector(31 downto 0));
 end entity;
@@ -12,19 +12,18 @@ end entity;
 Architecture RTL of majCPT is
   begin
     
-    process(nPCsel, PCin)
+    process(CLK,nPCsel)
       begin
         
+        if clk = '1' then
           
           if nPCsel = '1' then
-            
-            PCout <= std_logic_vector(unsigned(PCin) + 1 + unsigned(SignExt));
-            
+            PCout <= std_logic_vector(  to_unsigned( to_integer(unsigned(PCin)) + 4 + to_integer(unsigned(SignExt)), 32) ) ;-- +1 ou +4 ?
           else
-            PCout <= std_logic_vector(unsigned(PCin) + 1) ;
-            
+            PCout <= std_logic_vector(  to_unsigned( to_integer(unsigned(PCin)) + 4, 32) ) ;-- +1 ou +4 ?
           end if;
           
+        end if;
         
     end process;
   
