@@ -3,13 +3,17 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 Entity decodeur_instruction is Port(
-  instruction, flag: in std_logic_vector(31 downto 0);
-  nPCsel, PSREn, RegWr, RegSel, ALUsrc, WrSrc, MemWr  : out std_logic;
-  Rn, Rm, Rd : out std_logic_vector(3 downto 0);
-  ALUCtr : out std_logic_vector(1 downto 0));
+  instruction, flag             : in std_logic_vector(31 downto 0);
+  nPCsel, PSREn, RegWr          : out std_logic; 
+  RegSel, ALUsrc, WrSrc, MemWr  : out std_logic;
+  Rn, Rm, Rd                    : out std_logic_vector(3 downto 0);
+  ALUCtr                        : out std_logic_vector(1 downto 0));
 end entity;
 
 Architecture RTL of decodeur_instruction is
+  
+  type enum_instruction is (MOV, ADDi, ADDr, CMP, LDR, STR, BAL, BLT);
+  signal instr_courante : enum_instruction;
   
   Begin
     
@@ -22,35 +26,81 @@ Architecture RTL of decodeur_instruction is
             
             if instruction(25) = '1' then    -- ADD (Immediate)
             
-              Rn <= instruction(19 downto 16);
-              Rd <= instruction(15 downto 12);
-              nPCSel <= '0';
-              RegWr <= '1';
-              ALUSrc <= '1';
-              ALUCtr <= "00";
-              PSREn <= '0';
-              MemWr <= '0';
-              WrSrc <= '0';
-              RegSel <= '0';
+              instr_courante <= ADDi;
               
             elsif instruction(25) = '0' then  -- ADD (register)
               
-              Rn <= instruction(19 downto 16);
-              Rd <= instruction(15 downto 12);
-              Rm <= instruction(3 downto 0);
-              nPCSel <= '0';
-              RegWr <= '1';
-              ALUSrc <= '0';
-              ALUCtr <= "00";
-              PSREn <= '0';
-              MemWr <= '0';
-              WrSrc <= '0';
-              RegSel <= '0';
+              instr_courante <= ADDr;
               
            end if;
            
           elsif instruction(24 downto 21) = "1101" then -- MOV
             
+            instr_courante <= MOV;
+          
+          elsif instruction(24 downto 21) = "1010" then -- CMP
+            
+            instr_courante <= CMP;
+            
+          end if;
+          
+        elsif instruction(27 downto 26) = "01" then -- (LDR, STR)
+          
+          if instruction(20) = '1' then  -- LDR
+            
+            instr_courante <= LDR;
+            
+          elsif instruction(20) = '0' then -- STR
+            
+            instr_courante <= STR;
+            
+          end if;
+            
+        elsif instruction(27 downto 26) = "10" then -- (BAL, BLT)
+          
+          if instruction(31 downto 28) = "1110" then  -- BAL
+            
+            instr_courante <= BAL;
+            
+          elsif instruction(31 downto 28) = "1011" then  -- BLT
+            
+            instr_courante <= BLT;
+            
+          end if;
+          
+        end if;
+        
+      end process;
+      
+      process(instr_courante)
+        begin
+          
+          if instr_courante = ADDi then
+            Rn <= instruction(19 downto 16);
+            Rd <= instruction(15 downto 12);
+            nPCSel <= '0';
+            RegWr <= '1';
+            ALUSrc <= '1';
+            ALUCtr <= "00";
+            PSREn <= '0';
+            MemWr <= '0';
+            WrSrc <= '0';
+            RegSel <= '0';
+            
+          elsif instr_courante = ADDr then
+            Rn <= instruction(19 downto 16);
+            Rd <= instruction(15 downto 12);
+            Rm <= instruction(3 downto 0);
+            nPCSel <= '0';
+            RegWr <= '1';
+            ALUSrc <= '0';
+            ALUCtr <= "00";
+            PSREn <= '0';
+            MemWr <= '0';
+            WrSrc <= '0';
+            RegSel <= '0';
+            
+          elsif instr_courante = MOV then
             Rd <= instruction(15 downto 12);
             nPCSel <= '0';
             RegWr <= '1';
@@ -60,9 +110,8 @@ Architecture RTL of decodeur_instruction is
             MemWr <= '0';
             WrSrc <= '0';
             RegSel <= '0';
-          
-          elsif instruction(24 downto 21) = "1010" then -- CMP
             
+          elsif instr_courante = CMP then
             Rn <= instruction(19 downto 16);
             nPCSel <= '0';
             RegWr <= '0';
@@ -73,12 +122,7 @@ Architecture RTL of decodeur_instruction is
             WrSrc <= '0';
             RegSel <= '0';
             
-          end if;
-          
-        elsif instruction(27 downto 26) = "01" then -- (LDR, STR)
-          
-          if instruction(20) = '1' then  -- LDR
-            
+          elsif instr_courante = LDR then
             Rn <= instruction(19 downto 16);
             Rd <= instruction(15 downto 12);
             nPCSel <= '0';
@@ -90,8 +134,7 @@ Architecture RTL of decodeur_instruction is
             WrSrc <= '1';
             RegSel <= '0';
             
-          elsif instruction(20) = '0' then -- STR
-            
+          elsif instr_courante = STR then 
             Rn <= instruction(19 downto 16);
             Rd <= instruction(15 downto 12);
             nPCSel <= '0';
@@ -102,12 +145,7 @@ Architecture RTL of decodeur_instruction is
             MemWr <= '1';
             RegSel <= '1';
             
-          end if;
-            
-        elsif instruction(27 downto 26) = "10" then -- (BAL, BLT)
-          
-          if instruction(31 downto 28) = "1110" then  -- BAL
-            
+          elsif instr_courante = BAL then
             nPCSel <= '1';
             RegWr <= '0';
             PSREn <= '0';
@@ -115,9 +153,9 @@ Architecture RTL of decodeur_instruction is
             WrSrc <= '0';
             RegSel <= '0';
             
-          elsif instruction(31 downto 28) = "1011" then  -- BLT
-            
-            if flag = std_logic_vector(to_unsigned(1, 32)) then -- Conditon respectee
+         elsif instr_courante = BLT then
+           
+           if flag = std_logic_vector(to_unsigned(1, 32)) then -- Conditon respectee
               
               nPCSel <= '1';
               RegWr <= '0';
@@ -125,7 +163,7 @@ Architecture RTL of decodeur_instruction is
               MemWr <= '0';
               RegSel <= '0';
               
-            elsif flag = std_logic_vector(to_unsigned(0, 32)) then    -- Condition non respectee
+            else    -- Condition non respectee
               
              
               nPCSel <= '0';
@@ -135,11 +173,8 @@ Architecture RTL of decodeur_instruction is
               RegSel <= '0';
               
             end if;
-            
           end if;
           
-        end if;
-        
       end process;
     
     
