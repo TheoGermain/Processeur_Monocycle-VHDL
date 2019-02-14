@@ -24,7 +24,7 @@ Architecture RTL of assemblage_UT is
     C1 : entity work.MUX21(behav) generic map(N => 32) port map(A => busB, B => imm_extended, COM => ALUSrc, S => muxToAlu);
     C2 : entity work.imm_extender(RTL) generic map(N => 8) port map(E => Imm, S => imm_extended);
     C3 : entity work.ALU(RTL) port map(OP => ALUCtr, A => busA, B => muxToAlu, S => ALUout, N => flag);
-    C4 : entity work.data_memory(RTL) port map(CLK => CLK, RST => RST, Addr => ALUout(5 downto 0), WrEn => WrEn, DataIn => busB, DataOut => DataOut);
+    C4 : entity work.data_memory(RTL) port map(CLK => CLK, Addr => ALUout(5 downto 0), WrEn => WrEn, DataIn => busB, DataOut => DataOut);
     C5 : entity work.MUX21(behav) generic map(N => 32) port map(A => ALUout, B => DataOut, COM => WrSrc, S => busW);
     C6 : entity work.MUX21(behav) generic map (N => 4) port map(A => Rm, B => Rd, COM => RegSel, S => RB);
     

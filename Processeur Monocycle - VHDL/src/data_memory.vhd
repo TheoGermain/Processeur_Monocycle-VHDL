@@ -3,7 +3,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 Entity data_memory is Port(
-  CLK, RST  : in std_logic;
+  CLK       : in std_logic;
   Addr      : in std_logic_vector(5 downto 0);
   WrEn      : in std_logic;
   DataIn    : in std_logic_vector(31 downto 0);
@@ -22,8 +22,9 @@ Architecture RTL of data_memory is
   begin
     
     for i in 63 downto 0 loop 
-      result(i) := (others =>'0');
+      result(i) := std_logic_vector(to_unsigned(i + 1 , 32));
     end loop;
+    
     return result;
     
     end init_banc;
@@ -37,15 +38,10 @@ Architecture RTL of data_memory is
     
     DataOut <= Banc(to_integer(unsigned(Addr)));
     
-    process(clk, rst)
+    process(clk)
       begin
         
-        if RST = '1' then
-          for i in 63 downto 0 loop 
-            Banc(i) <= (others =>'0');
-          end loop;
-          
-        elsif rising_edge(clk) then
+        if rising_edge(clk) then
           if WrEn = '1' then
             Banc(to_integer(unsigned(Addr))) <= DataIn;
           end if;

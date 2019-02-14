@@ -32,7 +32,9 @@ end init_mem;
 
 signal mem: RAM64x32 := init_mem;
 
-begin 
-			Instruction <= mem(to_integer (unsigned (PC)));
+begin
+  
+  Instruction <= mem(to_integer (unsigned (PC)));
+			 
 end architecture;
 	

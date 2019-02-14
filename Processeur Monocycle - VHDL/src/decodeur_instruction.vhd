@@ -69,10 +69,10 @@ Architecture RTL of decodeur_instruction is
           end if;
           
         end if;
-        
+          
       end process;
       
-      process(instr_courante)
+      process(instruction, instr_courante)
         begin
           
           if instr_courante = ADDi then

@@ -19,5 +19,4 @@ Architecture RTL of processeur_monocycle is
     C1 : entity work.assemblage_UT(RTL) port map(CLK => CLK, RST => RST, RegSel => RegSel, RegWr => RegWr, WrEn => MemWr, Rd => Rd, Rn => Rn, Rm => Rm, Imm => instruction(7 downto 0), ALUctr => ALUctr, ALUSrc => ALUSrc, WrSrc => WrSrc, flag => flag);
     C2 : entity work.unite_de_controle(RTL) port map(CLK => CLK, RST => RST, DataIn => flag, instruction => instruction, nPCsel => nPCsel, RegWr => RegWr, RegSel => RegSel, ALUsrc => ALUsrc, WrSrc => WrSrc, MemWr => MemWr, Rn => Rn, Rm => Rm, Rd => Rd, ALUCtr => ALUCtr);
      
-    
 end RTL;
