@@ -8,7 +8,8 @@ Entity assemblage_UT is Port(
   Imm              : in std_logic_vector(7 downto 0);
   ALUCtr           : in std_logic_vector(1 downto 0); 
   ALUSrc, WrSrc    : in std_logic;
-  flag             : out std_logic);
+  flag             : out std_logic;
+  Sortie_verif     : out std_logic_vector(31 downto 0));
 end entity;
 
 Architecture RTL of assemblage_UT is 
@@ -27,5 +28,7 @@ Architecture RTL of assemblage_UT is
     C4 : entity work.data_memory(RTL) port map(CLK => CLK, Addr => ALUout(5 downto 0), WrEn => WrEn, DataIn => busB, DataOut => DataOut);
     C5 : entity work.MUX21(behav) generic map(N => 32) port map(A => ALUout, B => DataOut, COM => WrSrc, S => busW);
     C6 : entity work.MUX21(behav) generic map (N => 4) port map(A => Rm, B => Rd, COM => RegSel, S => RB);
+      
+    Sortie_verif <= busW;
     
 end RTL;

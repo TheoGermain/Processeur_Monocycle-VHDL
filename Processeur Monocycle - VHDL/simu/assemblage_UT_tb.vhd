@@ -1,41 +1,55 @@
 library ieee;
 use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-Entity assemblage_UT_tb is
+Entity assemblage_UT_tb is Port(
+  OK : out boolean);
 end entity;
 
 Architecture TB of assemblage_UT_tb is
 
-  signal CLK, RST    :  std_logic;
-  signal RegWr, WrEn :  std_logic;
-  signal RW, RA, RB  :  std_logic_vector(3 downto 0);
-  signal Imm         :  std_logic_vector(7 downto 0);
-  signal OP          :  std_logic_vector(1 downto 0); 
-  signal SEL1, SEL2  :  std_logic;
-  signal flag        :  std_logic;
+  signal CLK, RST       :  std_logic;
+  signal RegWr, WrEn    :  std_logic;
+  signal Rd, Rn, Rm     :  std_logic_vector(3 downto 0);
+  signal Imm            :  std_logic_vector(7 downto 0);
+  signal ALUCtr         :  std_logic_vector(1 downto 0); 
+  signal ALUSrc, WrSrc  :  std_logic;
+  signal flag           :  std_logic;
+  signal Sortie_verif   :  std_logic_vector(31 downto 0);
+  signal RegSel         :  std_logic;
   
   Begin
     
     process
       begin
+        OK <= true;
         clk <= '0';
         rst <= '0';
         RegWr <= '0';
         WrEn <= '0';
+        RegSel <= '0';
         
         -- Addition de deux registres (R1 = R1 + R15)
         
         RegWr <= '1';
-        RW <= "0001";
-        RA <= "0001";
-        RB <= "1111";
-        SEL1 <= '0';
-        SEL2 <= '0';
-        OP <= "00";
+        Rd <= "0001";
+        Rn <= "0001";
+        Rm <= "1111";
+        ALUSrc <= '0';
+        WrSrc <= '0';
+        ALUCtr <= "00";
+        
+        
         
         wait for 5 ns;
         
-        clk <= '1'; --Verification visuelle grâce à banc
+        if Sortie_verif /= X"00000030" then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
+        
+        clk <= '1';
         
         wait for 5 ns;
         
@@ -44,14 +58,20 @@ Architecture TB of assemblage_UT_tb is
         -- Addition d'un registre avec une valeur immédiate (R2 = R1 + 20)
         
         RegWr <= '1';
-        RW <= "0010";
-        RA <= "0001";
+        Rd <= "0010";
+        Rn <= "0001";
         Imm <= "00010100";
-        SEL1 <= '1';
-        SEL2 <= '0';
-        OP <= "00";
+        ALUSrc <= '1';
+        WrSrc <= '0';
+        ALUCtr <= "00";
         
         wait for 5 ns;
+        
+        if Sortie_verif /= std_logic_vector(to_unsigned(68, 32)) then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
         
         clk <= '1';
         
@@ -62,14 +82,22 @@ Architecture TB of assemblage_UT_tb is
         -- Soustraction de deux registres (R3 = R2 - R1)
         
         RegWr <= '1';
-        RW <= "0011";
-        RA <= "0010";
-        RB <= "0001";
-        SEL1 <= '0';
-        SEL2 <= '0';
-        OP <= "10";
+        Rd <= "0011";
+        Rn <= "0010";
+        Rm <= "0001";
+        ALUSrc <= '0';
+        WrSrc <= '0';
+        ALUCtr <= "10";
+        
         
         wait for 5 ns;
+        
+        if Sortie_verif /= std_logic_vector(to_unsigned(20, 32)) then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
+        
         
         clk <= '1';
         
@@ -80,14 +108,21 @@ Architecture TB of assemblage_UT_tb is
         -- Soustraction d'une valeur immédiate et d'un registre (R4 = R3 - 35)
         
         RegWr <= '1';
-        RW <= "0100";
-        RA <= "0011";
+        Rd <= "0100";
+        Rn <= "0011";
         Imm <= "00100011";
-        SEL1 <= '1';
-        SEL2 <= '0';
-        OP <= "10";
+        ALUSrc <= '1';
+        WrSrc <= '0';
+        ALUCtr <= "10";
+        
         
         wait for 5 ns;
+        
+        if Sortie_verif /= std_logic_vector(to_signed(-15, 32)) then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
         
         clk <= '1';
         
@@ -98,13 +133,19 @@ Architecture TB of assemblage_UT_tb is
         -- Copie d'un registre dans un autre (R5 = R2)
         
         RegWr <= '1';
-        RW <= "0101";
-        RA <= "0010";
-        SEL1 <= '0';
-        SEL2 <= '0';
-        OP <= "11";
+        Rd <= "0101";
+        Rn <= "0010";
+        ALUSrc <= '0';
+        WrSrc <= '0';
+        ALUCtr <= "11";
         
         wait for 5 ns;
+        
+        if Sortie_verif /= std_logic_vector(to_unsigned(68, 32)) then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
         
         clk <= '1';
         
@@ -116,16 +157,25 @@ Architecture TB of assemblage_UT_tb is
         
         RegWr <= '0';
         WrEn <= '1';
-        RB <= "0100";
+        Rm <= "0100";
         Imm <= "00001010";
-        SEL1 <= '1';
-        OP <= "01";
+        ALUSrc <= '1';
+        WrSrc <= '1';
+        ALUCtr <= "01";
         
         wait for 5 ns;
         
         clk <= '1';
         
-        wait for 5 ns;
+        wait for 2 ns;
+        
+        if Sortie_verif /= std_logic_vector(to_signed(-15, 32)) then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
+        
+        wait for 3 ns;
         
         clk <= '0';
         
@@ -133,19 +183,29 @@ Architecture TB of assemblage_UT_tb is
         
         RegWr <= '1';
         WrEn <= '0';
-        RW <= "0110";
+        Rd <= "0110";
         Imm <= "00001010";
-        SEL1 <= '1';
-        SEL2 <= '1';
-        OP <= "01";
+        ALUSrc <= '1';
+        WrSrc <= '1';
+        ALUCtr <= "01";
         
         wait for 5 ns;
         
+        if Sortie_verif /= std_logic_vector(to_signed(-15, 32)) then
+          OK <= false;
+        else
+          OK <= true;
+        end if;
+        
         clk <= '1';
+        
+        wait for 5 ns;
+        
+        clk <= '0';
      
         wait;
     end process;
     
-    UUT: entity work.assemblage_UT(RTL)  port map (clk => clk, rst => rst, RegWr => RegWr, WrEn => WrEn, RW => RW, RA => RA, RB => RB, Imm => Imm, OP => OP, SEL1 => SEL1, SEL2 => SEL2, flag => flag);
+    UUT: entity work.assemblage_UT(RTL)  port map (clk => clk, rst => rst, RegWr => RegWr, WrEn => WrEn, Rd => Rd, Rn => Rn, Rm => Rm, Imm => Imm, ALUCtr => ALUCtr, ALUSrc => ALUSrc, WrSrc => WrSrc, flag => flag, Sortie_verif => Sortie_verif, RegSel => RegSel);
 
 end TB;

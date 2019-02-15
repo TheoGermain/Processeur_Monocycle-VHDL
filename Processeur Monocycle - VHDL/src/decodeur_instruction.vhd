@@ -6,7 +6,6 @@ Entity decodeur_instruction is Port(
   instruction, flag             : in std_logic_vector(31 downto 0);
   nPCsel, PSREn, RegWr          : out std_logic; 
   RegSel, ALUsrc, WrSrc, MemWr  : out std_logic;
-  Rn, Rm, Rd                    : out std_logic_vector(3 downto 0);
   ALUCtr                        : out std_logic_vector(1 downto 0));
 end entity;
 
@@ -76,8 +75,6 @@ Architecture RTL of decodeur_instruction is
         begin
           
           if instr_courante = ADDi then
-            Rn <= instruction(19 downto 16);
-            Rd <= instruction(15 downto 12);
             nPCSel <= '0';
             RegWr <= '1';
             ALUSrc <= '1';
@@ -88,9 +85,6 @@ Architecture RTL of decodeur_instruction is
             RegSel <= '0';
             
           elsif instr_courante = ADDr then
-            Rn <= instruction(19 downto 16);
-            Rd <= instruction(15 downto 12);
-            Rm <= instruction(3 downto 0);
             nPCSel <= '0';
             RegWr <= '1';
             ALUSrc <= '0';
@@ -101,7 +95,6 @@ Architecture RTL of decodeur_instruction is
             RegSel <= '0';
             
           elsif instr_courante = MOV then
-            Rd <= instruction(15 downto 12);
             nPCSel <= '0';
             RegWr <= '1';
             ALUSrc <= '1';
@@ -112,7 +105,6 @@ Architecture RTL of decodeur_instruction is
             RegSel <= '0';
             
           elsif instr_courante = CMP then
-            Rn <= instruction(19 downto 16);
             nPCSel <= '0';
             RegWr <= '0';
             ALUSrc <= '1';
@@ -123,8 +115,6 @@ Architecture RTL of decodeur_instruction is
             RegSel <= '0';
             
           elsif instr_courante = LDR then
-            Rn <= instruction(19 downto 16);
-            Rd <= instruction(15 downto 12);
             nPCSel <= '0';
             RegWr <= '1';
             ALUSrc <= '1';
@@ -135,8 +125,6 @@ Architecture RTL of decodeur_instruction is
             RegSel <= '0';
             
           elsif instr_courante = STR then 
-            Rn <= instruction(19 downto 16);
-            Rd <= instruction(15 downto 12);
             nPCSel <= '0';
             RegWr <= '0';
             ALUSrc <= '1';
